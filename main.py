@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
+#import telegram as tl
 
 
 def detect(image):
@@ -44,8 +44,10 @@ def detect(image):
     #ax = fig.add_subplot(111)
     #ax.imshow(fiexd_image)
     return fiexd_image, classIDs.count(0)
+ 
 
 st.header('Welcome to the School Monitoring System')
+In1 = st.selectbox('Select your observation camera', ['GYMNASIUM', 'CAFETERIA', 'WEBCAM'])
 st.subheader('Here you can monitor each location of your school, monitoring how many people there are in each location and if there is a crowd you can use the "ALERT" button to send a text message to the campus security guards. ')
 
 #YOLO THINS
@@ -54,22 +56,42 @@ net = cv2.dnn.readNetFromDarknet("yolo/yolov3.cfg", "yolo/yolov3.weights")
 
 stframe = st.empty()
 
-In1 = st.selectbox('Selecione sua câmera de observação', ['GINÁSIO', 'LANCHONETE', 'WEBCAM'])
+
+text = st.empty()
 
 if In1 == 'WEBCAM':
     cap = cv2.VideoCapture(0)
     while (cap.isOpened()):
-        ret,frame=cap.read()
-        frame=cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
-        frame , count =detect(frame)
+        ret, frame = cap.read()
+        frame =cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
+        frame,count = detect(frame)
+        text.markdown(f'**There are {count} in this place**')
         frm = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        stframe.image(frm, width = 520)
-        
-    
+        stframe.image(frm, width = 550)
+    st.button('Send Warning Message', key = '1')
+            
+if In1 == 'GYMNASIUM':
+    cap = cv2.VideoCapture('ginasio.mkv')
+    while (cap.isOpened()):
+        ret, frame = cap.read()
+        frame =cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
+        frame,count = detect(frame)
+        text.markdown(f'**There are {count} in this place**')       
+        frm = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        stframe.image(frm, width = 550)
+        #if st.button('Send Warning Message', key = '2'):
+        #    tl.telegram_sms()
 
-if In1 == 'GINÁSIO':
-    pass
+
     
-if In1 == 'LANCHONETE':
-    pass
+if In1 == 'CAFETERIA':
+    cap = cv2.VideoCapture('lanchonete.mkv')
+    while (cap.isOpened()):
+        ret, frame = cap.read()
+        frame =cv2.resize(frame,(0,0),fx=0.25,fy=0.25)
+        frame,count = detect(frame)
+        text.markdown(f'**There are {count} in this place**')
+        frm = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        stframe.image(frm, width = 550)
+    st.button('Send Warning Message', key = '3')
     
